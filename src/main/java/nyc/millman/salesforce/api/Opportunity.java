@@ -14,6 +14,5 @@ public record Opportunity(
         @JsonProperty("accountId") String accountId,
         @JsonProperty("probability") String probability,
         @JsonProperty("stageName") String stageName
-
         ) {
 }
