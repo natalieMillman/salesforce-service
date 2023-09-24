@@ -1,0 +1,7 @@
+salesforceClientConfiguration:
+    baseUrl: "natalie@millman.com.sandbox"
+salesforceAuthenticationConfiguration:
+    username: "natalie@millman.com.sandbox"
+    password: "TheSilverChair1!"
+    clientId: "3MVG95nWQGdmAiEqZ8k2wp2ezp7GSj4I9Y1g69d2es8EOeVu4dwbY.LhK83kBiygBhj387.NeZkjLQxwqHTZT"
+    clientSecret: "EDBF1B48DEF01656DAF0D96059ADB64F8770C69F1151AC962C1F8806B333D4F3"
