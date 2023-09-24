@@ -1,4 +1,4 @@
-# Dropwizard Salesforce Integration Microservice
+# Dropwizard Salesforce Microservice
 
 ## Overview
 
