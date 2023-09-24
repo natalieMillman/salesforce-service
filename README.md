@@ -1,5 +1,3 @@
-# salesforce-service
-
 # Dropwizard Salesforce Integration Microservice
 
 ## Overview
