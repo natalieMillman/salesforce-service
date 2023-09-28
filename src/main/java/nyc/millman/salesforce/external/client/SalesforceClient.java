@@ -30,6 +30,7 @@ public class SalesforceClient {
         this.client = HttpClient.newHttpClient();
         this.configuration = configuration;
         this.authenticationConfiguration = AuthenticationConfiguration;
+        this.mapper.registerModule(new JavaTimeModule());
         this.baseUrl = configuration.getBaseUrl();
         this.token = getToken();
     }
@@ -63,12 +64,9 @@ public class SalesforceClient {
     private SalesforceToken getToken(){
         try{
             if(this.token != null){
-                logger.info("Using existing token");
                 return this.token;
             } else {
-                logger.info("Getting new token");
                 HttpResponse<String> response = fetchToken();
-                logger.info("Response: {}", response);
                 return mapper.readValue(response.body(), SalesforceToken.class);
             }
         } catch (Exception e){
@@ -78,7 +76,6 @@ public class SalesforceClient {
     }
 
     private HttpResponse<String> fetchToken() throws IOException, InterruptedException {
-        mapper.registerModule(new JavaTimeModule());
         var requestBody = getRequestBody();
         var uri = URI.create(String.format("%s%s", baseUrl, "/services/oauth2/token"));
         var bodyPublisher = HttpRequest.BodyPublishers.ofString(requestBody);
