@@ -6,11 +6,12 @@
 
     <groupId>nyc.millman</groupId>
     <artifactId>salesforce-service</artifactId>
-    <version>1.0.1</version>
+    <version>1.1.0</version>
 
     <properties>
         <dropwizard.version>4.0.1</dropwizard.version>
         <grpc.version>1.48.0</grpc.version>
+        <jackson.version>2.15.2</jackson.version>
         <kr.motd.maven.version>1.6.2</kr.motd.maven.version>
         <protobuf.version>3.21.4</protobuf.version>
         <protoc.version>3.21.4</protoc.version>
@@ -43,7 +44,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
-            <version>2.15.2</version>
+            <version>${jackson.version}</version>
         </dependency>
     </dependencies>
 
