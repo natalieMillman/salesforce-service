@@ -32,7 +32,6 @@ public class SalesforceClient {
         this.authenticationConfiguration = AuthenticationConfiguration;
         this.baseUrl = configuration.getBaseUrl();
         this.token = getToken();
-        logger.info(token.toString());
     }
 
     public HttpResponse<String> get(String url) throws IOException, InterruptedException {
@@ -44,7 +43,6 @@ public class SalesforceClient {
                 .header("Accept", "application/json")
                 .header("Authorization", "Bearer " + token.accessToken())
                 .build();
-        logger.info("Salesforce request: {}", request);
         return client.send(request, HttpResponse.BodyHandlers.ofString());
     }
 
@@ -59,7 +57,6 @@ public class SalesforceClient {
                 .header("Authorization", "Bearer " + token.accessToken())
                 .header("content-type", contentType)
                 .build();
-        logger.info("Salesforce request: {}", request);
         return client.send(request, HttpResponse.BodyHandlers.ofString());
     }
 
@@ -80,7 +77,7 @@ public class SalesforceClient {
         return null;
     }
 
-    public HttpResponse<String> fetchToken() throws IOException, InterruptedException {
+    private HttpResponse<String> fetchToken() throws IOException, InterruptedException {
         mapper.registerModule(new JavaTimeModule());
         var requestBody = getRequestBody();
         var uri = URI.create(String.format("%s%s", baseUrl, "/services/oauth2/token"));
@@ -91,7 +88,6 @@ public class SalesforceClient {
                 .header("Accept", "application/json")
                 .header("content-type", "application/x-www-form-urlencoded")
                 .build();
-        logger.info("Salesforce request: {}", request);
         return client.send(request, HttpResponse.BodyHandlers.ofString());
     }
 
