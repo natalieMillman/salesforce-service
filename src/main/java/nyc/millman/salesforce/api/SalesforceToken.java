@@ -7,8 +7,10 @@ import java.time.Instant;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record SalesforceToken(
-        @JsonProperty String accessToken,
+        @JsonProperty("id") String id,
         @JsonProperty("issued_at") Instant issuedAt,
-        @JsonProperty String orgId,
-        @JsonProperty String instanceUrl) {
+        @JsonProperty("instance_url") String instanceUrl,
+        @JsonProperty("signature") String signature,
+        @JsonProperty("access_token") String accessToken,
+        @JsonProperty("token_type") String tokenType) {
 }
