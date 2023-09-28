@@ -1,7 +1,5 @@
 salesforceClientConfiguration:
     baseUrl: ""
 salesforceAuthenticationConfiguration:
-    username: ""
-    password: ""
     clientId: ""
     clientSecret: ""
