@@ -8,7 +8,6 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 
 @JsonInclude(NON_EMPTY)
 @JsonIgnoreProperties(ignoreUnknown = true)
-
 public record Opportunity(
         @JsonProperty("name") String name,
         @JsonProperty("accountId") String accountId,
