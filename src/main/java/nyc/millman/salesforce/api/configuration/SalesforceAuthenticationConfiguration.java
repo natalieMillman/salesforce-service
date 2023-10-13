@@ -1,4 +1,4 @@
-package nyc.millman.salesforce.api;
+package nyc.millman.salesforce.api.configuration;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
