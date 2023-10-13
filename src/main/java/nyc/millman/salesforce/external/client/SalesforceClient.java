@@ -2,8 +2,8 @@ package nyc.millman.salesforce.external.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import nyc.millman.salesforce.api.SalesforceAuthenticationConfiguration;
-import nyc.millman.salesforce.api.SalesforceClientConfiguration;
+import nyc.millman.salesforce.api.configuration.SalesforceAuthenticationConfiguration;
+import nyc.millman.salesforce.api.configuration.SalesforceClientConfiguration;
 import nyc.millman.salesforce.api.SalesforceToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +13,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
@@ -27,12 +28,12 @@ public class SalesforceClient {
     private SalesforceToken token;
 
     public SalesforceClient(SalesforceClientConfiguration configuration, SalesforceAuthenticationConfiguration AuthenticationConfiguration) {
-        this.client = HttpClient.newHttpClient();
         this.configuration = configuration;
         this.authenticationConfiguration = AuthenticationConfiguration;
         this.mapper.registerModule(new JavaTimeModule());
         this.baseUrl = configuration.getBaseUrl();
         this.token = getToken();
+        this.client = buildClient(configuration);
     }
 
     public HttpResponse<String> get(String url) throws IOException, InterruptedException {
@@ -59,6 +60,12 @@ public class SalesforceClient {
                 .header("content-type", contentType)
                 .build();
         return client.send(request, HttpResponse.BodyHandlers.ofString());
+    }
+
+    private void fetchNewTokenIfNeeded(){
+        if(Instant.now().minus(900, ChronoUnit.SECONDS).isBefore(token.issuedAt())){
+            this.token = getToken();
+        }
     }
 
     private SalesforceToken getToken(){
@@ -88,16 +95,16 @@ public class SalesforceClient {
         return client.send(request, HttpResponse.BodyHandlers.ofString());
     }
 
-    private void fetchNewTokenIfNeeded(){
-        if(Instant.now().minus(900, ChronoUnit.SECONDS).isBefore(token.issuedAt())){
-            this.token = getToken();
-        }
-    }
-
     private String getRequestBody(){
         return String.format("grant_type=client_credentials&client_id=%s&client_secret=%s",
                 authenticationConfiguration.getClientId(),
                 authenticationConfiguration.getClientSecret());
+    }
+
+    private final HttpClient buildClient(SalesforceClientConfiguration configuration){
+        return HttpClient.newBuilder()
+                .connectTimeout(Duration.of(configuration.getTimeout(), ChronoUnit.SECONDS))
+                .build();
     }
 
 }
