@@ -15,7 +15,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 
 public class SalesforceClient {
     
@@ -63,12 +62,12 @@ public class SalesforceClient {
     }
 
     private void fetchNewTokenIfNeeded(){
-        if(Instant.now().minus(900, ChronoUnit.SECONDS).isBefore(token.issuedAt())){
+        if(Instant.now().minusSeconds(900).isBefore(token.issuedAt())){
             this.token = getToken();
         }
     }
 
-    private SalesforceToken getToken(){
+    public SalesforceToken getToken(){
         try{
             if(this.token != null){
                 return this.token;
@@ -101,10 +100,14 @@ public class SalesforceClient {
                 authenticationConfiguration.getClientSecret());
     }
 
-    private final HttpClient buildClient(SalesforceClientConfiguration configuration){
+    private HttpClient buildClient(SalesforceClientConfiguration configuration){
         return HttpClient.newBuilder()
-                .connectTimeout(Duration.of(configuration.getTimeout(), ChronoUnit.SECONDS))
+                .connectTimeout(Duration.ofSeconds(configuration.getTimeout()))
                 .build();
+    }
+
+    public void close(){
+        client.shutdown();
     }
 
 }
