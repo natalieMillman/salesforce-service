@@ -41,8 +41,8 @@ public class PubSubService implements AutoCloseable {
     public PubSubService(SubscriberConfiguration configuration, SalesforceClient client) {
         this.configuration = configuration;
         this.client = client;
-        this.grpcHost = configuration.pubsubHost();
-        this.grpcPort = configuration.pubsubPort();
+        this.grpcHost = configuration.host();
+        this.grpcPort = configuration.port();
         this.channel = buildChannel(grpcHost, grpcPort);
         logger.info("Using grpcHost {} and grpcPort {}", grpcHost, grpcPort);
 
