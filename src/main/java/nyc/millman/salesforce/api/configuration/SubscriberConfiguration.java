@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.protobuf.ByteString;
 import com.salesforce.eventbus.protobuf.ReplayPreset;
 
+import java.nio.ByteBuffer;
 import java.util.Objects;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -22,7 +23,7 @@ public final class SubscriberConfiguration {
     @JsonProperty
     private final ReplayPreset replayPreset;
     @JsonProperty
-    private final ByteString replayId;
+    private final long replayId;
 
     public SubscriberConfiguration(
             @JsonProperty("host")  String host,
@@ -31,7 +32,7 @@ public final class SubscriberConfiguration {
             @JsonProperty("numberOfEventsToSubscribeInEachFetchRequest")  Integer numberOfEventsToSubscribeInEachFetchRequest,
             @JsonProperty("plaintextChannel")  Boolean plaintextChannel,
             @JsonProperty("replayPreset")  ReplayPreset replayPreset,
-            @JsonProperty("replayId") ByteString replayId
+            @JsonProperty("replayId") long replayId
     ) {
         this.host = host;
         this.port = port;
@@ -43,38 +44,46 @@ public final class SubscriberConfiguration {
     }
 
     @JsonProperty
-    public String host() {
+    public String getHost() {
         return host;
     }
 
     @JsonProperty
-    public Integer port() {
+    public Integer getPort() {
         return port;
     }
 
     @JsonProperty
-    public String topic() {
+    public String getTopic() {
         return topic;
     }
 
     @JsonProperty
-    public Integer numberOfEventsToSubscribeInEachFetchRequest() {
+    public Integer getNumberOfEventsToSubscribeInEachFetchRequest() {
         return numberOfEventsToSubscribeInEachFetchRequest;
     }
 
     @JsonProperty
-    public Boolean plaintextChannel() {
+    public Boolean getPlaintextChannel() {
         return plaintextChannel;
     }
 
     @JsonProperty
-    public ReplayPreset replayPreset() {
+    public ReplayPreset getReplayPreset() {
         return replayPreset;
     }
 
     @JsonProperty
-    public ByteString replayId() {
-        return replayId;
+    public ByteString getReplayId() {
+        return getReplayIdFromLong(replayId);
+    }
+
+    private static ByteString getReplayIdFromLong(long replayValue) {
+        ByteBuffer buffer = ByteBuffer.allocate(8);
+        buffer.putLong(replayValue);
+        buffer.flip();
+
+        return ByteString.copyFrom(buffer);
     }
 
     @Override
