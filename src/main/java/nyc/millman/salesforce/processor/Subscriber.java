@@ -9,7 +9,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import io.grpc.Metadata;
 import io.grpc.StatusRuntimeException;
 
-import nyc.millman.salesforce.api.SalesforceCredentials;
 import nyc.millman.salesforce.api.configuration.SubscriberConfiguration;
 import nyc.millman.salesforce.external.client.SalesforceClient;
 import org.apache.avro.Schema;
@@ -31,6 +30,8 @@ public class Subscriber extends PubSubService {
     private static final String ERROR_SERVICE_UNAVAILABLE = "service.unavailable";
     public static int SERVICE_UNAVAILABLE_WAIT_BEFORE_RETRY_SECONDS = 5;
     private final SubscriberConfiguration subscriberConfiguration;
+
+    private final SalesforceClient salesforceClient;
     public static AtomicBoolean isActive = new AtomicBoolean(false);
     public static AtomicInteger retriesLeft = new AtomicInteger(MAX_RETRIES);
     private StreamObserver<FetchRequest> serverStream;
@@ -47,18 +48,16 @@ public class Subscriber extends PubSubService {
         super(subscriberConfiguration, salesforceClient);
         isActive.set(true);
         this.subscriberConfiguration = subscriberConfiguration;
-        this.batchSize = Math.min(5, subscriberConfiguration.numberOfEventsToSubscribeInEachFetchRequest());
+        this.salesforceClient = salesforceClient;
+        this.batchSize = Math.min(5, subscriberConfiguration.getNumberOfEventsToSubscribeInEachFetchRequest());
         this.responseStreamObserver = getDefaultResponseStreamObserver();
-        this.replayPreset = subscriberConfiguration.replayPreset();
-        this.customReplayId = subscriberConfiguration.replayId();
+        this.replayPreset = subscriberConfiguration.getReplayPreset();
+        this.customReplayId = subscriberConfiguration.getReplayId();
         this.retryScheduler = Executors.newScheduledThreadPool(1);
         this.eventProcessingExecutors = Executors.newFixedThreadPool(3);
-        this.setupTopicDetails(subscriberConfiguration.topic(), SUBSCRIBE, false);
+        this.setupTopicDetails(subscriberConfiguration.getTopic(), SUBSCRIBE, false);
     }
 
-    /**
-     * Function to start the subscription.
-     */
     public void startSubscription() {
         logger.info("Subscription started for topic: " + busTopicName + ".");
         fetch(batchSize, busTopicName, replayPreset, customReplayId);
@@ -69,12 +68,6 @@ public class Subscriber extends PubSubService {
         }
     }
 
-    /** Helper function to send FetchRequests.
-     * @param providedBatchSize
-     * @param providedTopicName
-     * @param providedReplayPreset
-     * @param providedReplayId
-     */
     public void fetch(int providedBatchSize, String providedTopicName, ReplayPreset providedReplayPreset, ByteString providedReplayId) {
         serverStream = asyncStub.subscribe(this.responseStreamObserver);
         FetchRequest.Builder fetchRequestBuilder = FetchRequest.newBuilder()
@@ -88,18 +81,11 @@ public class Subscriber extends PubSubService {
         serverStream.onNext(fetchRequestBuilder.build());
     }
 
-    /**
-     * Function to decide the delay (in ms) in sending FetchRequests using
-     * Binary Exponential Backoff - Waits for 2^(Max Number of Retries - Retries Left) * 1000.
-     */
     public long getBackoffWaitTime() {
         long waitTime = (long) (Math.pow(2, MAX_RETRIES - retriesLeft.get()) * 1000);
         return waitTime;
     }
 
-    /**
-     * Helper function to halt the current thread.
-     */
     public void waitInMillis(long duration) {
         synchronized (this) {
             try {
@@ -110,11 +96,6 @@ public class Subscriber extends PubSubService {
         }
     }
 
-    /**
-     * Creates a StreamObserver for handling the incoming FetchResponse messages from the server.
-     *
-     * @return
-     */
     private StreamObserver<FetchResponse> getDefaultResponseStreamObserver() {
         return new StreamObserver<FetchResponse>() {
             @Override
@@ -203,11 +184,6 @@ public class Subscriber extends PubSubService {
         };
     }
 
-    /**
-     * A Runnable class that is used to send the FetchRequests by making a new Subscribe call while retrying on
-     * receiving an error. This is done in order to avoid blocking the thread while waiting for retries. This class is
-     * passed to the ScheduledExecutorService which will asynchronously send the FetchRequests during retries.
-     */
     private class RetryRequestSender implements Runnable {
         private ReplayPreset retryReplayPreset;
         private ByteString retryReplayId;
@@ -223,9 +199,6 @@ public class Subscriber extends PubSubService {
         }
     }
 
-    /**
-     * A Runnable class that is used to process the events asynchronously using CompletableFuture.
-     */
     private class EventProcessor implements Runnable {
         private ConsumerEvent ce;
         public EventProcessor(ConsumerEvent consumerEvent) {
@@ -242,9 +215,6 @@ public class Subscriber extends PubSubService {
         }
     }
 
-    /**
-     * Helper function to process the events received.
-     */
     private void processEvent(ConsumerEvent ce) throws IOException {
         Schema writerSchema = getSchema(ce.getEvent().getSchemaId());
         this.storedReplay = ce.getReplayId();
@@ -252,9 +222,6 @@ public class Subscriber extends PubSubService {
         logger.info("Received event with payload: " + record.toString());
     }
 
-    /**
-     * Helper function to get the schema of an event if it does not already exist in the schema cache.
-     */
     public Schema getSchema(String schemaId) {
         return schemaCache.computeIfAbsent(schemaId, id -> {
             SchemaRequest request = SchemaRequest.newBuilder().setSchemaId(id).build();
@@ -263,20 +230,12 @@ public class Subscriber extends PubSubService {
         });
     }
 
-    /**
-     * Helps keep the subscription active by sending FetchRequests at regular intervals.
-     *
-     * @param numEvents
-     */
     public void fetchMore(int numEvents) {
         FetchRequest fetchRequest = FetchRequest.newBuilder().setTopicName(this.busTopicName)
                 .setNumRequested(numEvents).build();
         serverStream.onNext(fetchRequest);
     }
 
-    /**
-     * General getters and setters.
-     */
     public AtomicInteger getReceivedEvents() {
         return receivedEvents;
     }
@@ -296,9 +255,6 @@ public class Subscriber extends PubSubService {
         this.storedReplay = storedReplay;
     }
 
-    /**
-     * Closes the connection when the task is complete.
-     */
     @Override
     public synchronized void close() {
         try {
