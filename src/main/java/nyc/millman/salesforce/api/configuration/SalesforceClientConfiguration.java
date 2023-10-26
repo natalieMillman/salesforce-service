@@ -33,8 +33,8 @@ public class SalesforceClientConfiguration {
     @Override
     public String toString(){
         return "{" +
-                "baseUrl:\"" + baseUrl + "\"," +
-                "timeout:\"" + timeout + "\"" +
+                "\"baseUrl\":\"" + baseUrl + "\"," +
+                "\"timeout\":\"" + timeout + "\"" +
                 "}";
     }
 
