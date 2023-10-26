@@ -31,8 +31,8 @@ public class SalesforceClient {
         this.authenticationConfiguration = AuthenticationConfiguration;
         this.mapper.registerModule(new JavaTimeModule());
         this.baseUrl = configuration.getBaseUrl();
-        this.token = getToken();
         this.client = buildClient(configuration);
+        this.token = getToken();
     }
 
     public HttpResponse<String> get(String url) throws IOException, InterruptedException {
