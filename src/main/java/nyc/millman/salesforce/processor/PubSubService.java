@@ -41,12 +41,13 @@ public class PubSubService implements AutoCloseable {
     public PubSubService(SubscriberConfiguration configuration, SalesforceClient client) {
         this.configuration = configuration;
         this.client = client;
-        this.grpcHost = configuration.host();
-        this.grpcPort = configuration.port();
+        this.grpcHost = configuration.getHost();
+        this.grpcPort = configuration.getPort();
         this.channel = buildChannel(grpcHost, grpcPort);
         logger.info("Using grpcHost {} and grpcPort {}", grpcHost, grpcPort);
 
-        SalesforceCredentials credentials = new SalesforceCredentials(client.getToken());
+        SalesforceCredentials credentials  = new SalesforceCredentials(client.getToken());
+        logger.info("SalesforceCredentials {}", credentials);
 
         asyncStub = PubSubGrpc.newStub(channel).withCallCredentials(credentials);
         blockingStub = PubSubGrpc.newBlockingStub(channel).withCallCredentials(credentials);
@@ -71,34 +72,12 @@ public class PubSubService implements AutoCloseable {
         }
     }
 
-    public static ByteString getReplayIdFromLong(long replayValue) {
-        ByteBuffer buffer = ByteBuffer.allocate(8);
-        buffer.putLong(replayValue);
-        buffer.flip();
-
-        return ByteString.copyFrom(buffer);
-    }
-
-    public GenericRecord createCarMaintenanceRecord(Schema schema) {
-        // Please remember to use the appropriate orgId for the CreatedById field.
-        return new GenericRecordBuilder(schema).set("CreatedDate", System.currentTimeMillis() / 1000)
-                .set("CreatedById", "005xx000001Svwo").set("Mileage__c", 95443.0).set("Cost__c", 99.40)
-                .set("WorkDescription__c", "Replaced front brakes").build();
-    }
-
-    public GenericRecord createCarMaintenanceRecord(Schema schema, final int counter) {
-        // Please remember to use the appropriate orgId for the CreatedById field.
-        return new GenericRecordBuilder(schema).set("CreatedDate", System.currentTimeMillis() / 1000)
-                .set("CreatedById", "005xx000001Svwo").set("Mileage__c", 95443.0).set("Cost__c", 99.40)
-                .set("WorkDescription__c", "Replaced front brakes; event: " + counter).build();
-    }
-
     public static void printStatusRuntimeException(final String context, final Exception e) {
         logger.error(context);
 
         if (e instanceof StatusRuntimeException) {
             final StatusRuntimeException expected = (StatusRuntimeException)e;
-            logger.error(" === GRPC Exception ===", e);
+            logger.error(" === GRPC Exception === \n{}", e.getMessage());
             Metadata trailers = ((StatusRuntimeException)e).getTrailers();
             logger.error(" === Trailers ===");
             trailers.keys().stream().forEach(t -> {
@@ -118,7 +97,7 @@ public class PubSubService implements AutoCloseable {
     }
 
     private ManagedChannel buildChannel(String grpcHost, int grpcPort){
-        if (configuration.plaintextChannel()) {
+        if (configuration.getPlaintextChannel()) {
             return ManagedChannelBuilder.forAddress(grpcHost, grpcPort).usePlaintext().build();
         } else {
             return ManagedChannelBuilder.forAddress(grpcHost, grpcPort).build();
