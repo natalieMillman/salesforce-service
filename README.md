@@ -1,5 +1,9 @@
 # Dropwizard Salesforce Microservice
 
+## Disclaimer
+
+This project is a work in progress. Currently, the software can connect to Salesforce; however, it currently is unable to connect to the event bus.
+
 ## Overview
 
 This Git repository contains a Dropwizard microservice written in Java. This microservice serves as a bridge between your application and Salesforce, allowing you to interact with Salesforce data and services programmatically.
