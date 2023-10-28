@@ -55,7 +55,7 @@ public class Subscriber extends PubSubService {
         this.customReplayId = subscriberConfiguration.getReplayId();
         this.retryScheduler = Executors.newScheduledThreadPool(1);
         this.eventProcessingExecutors = Executors.newFixedThreadPool(3);
-        this.setupTopicDetails(subscriberConfiguration.getTopic(), SUBSCRIBE, false);
+        setupTopicDetails(subscriberConfiguration.getTopic(), SUBSCRIBE, false);
     }
 
     public void startSubscription() {
@@ -104,29 +104,18 @@ public class Subscriber extends PubSubService {
                 logger.info("RPC ID: " + fetchResponse.getRpcId());
                 for(ConsumerEvent ce : fetchResponse.getEventsList()) {
                     try {
-                        // Unless the schema of the event is available in the local schema cache, there is a blocking
-                        // GetSchema call being made to obtain the schema which may block the thread. Therefore, the
-                        // processing of events is done asynchronously.
                         CompletableFuture.runAsync(new EventProcessor(ce), eventProcessingExecutors);
                     } catch (Exception e) {
                         logger.info(e.toString());
                     }
                     receivedEvents.addAndGet(1);
                 }
-                // Latest replayId stored for any future FetchRequests with CUSTOM ReplayPreset.
-                // NOTE: Replay IDs are opaque in nature and should be stored and used as bytes without any conversion.
                 storedReplay = fetchResponse.getLatestReplayId();
 
                 // Reset retry count
                 if (retriesLeft.get() != MAX_RETRIES) {
                     retriesLeft.set(MAX_RETRIES);
                 }
-
-                // Implementing a basic flow control strategy where the next fetchRequest is sent only after the
-                // requested number of events in the previous fetchRequest(s) are received.
-                // NOTE: This block may need to be implemented before the processing of events if event processing takes
-                // a long time. There is a 70s timeout period during which, if pendingNumRequested is 0 and no events are
-                // further requested then the stream will be closed.
                 if (fetchResponse.getPendingNumRequested() == 0) {
                     fetchMore(batchSize);
                 }
