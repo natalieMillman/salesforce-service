@@ -8,11 +8,11 @@ import java.util.concurrent.Executor;
 
 public class SalesforceCredentials extends CallCredentials {
 
-    private static final Metadata.Key<String> INSTANCE_URL = keyOf("instanceUrl");
+    public static final Metadata.Key<String> INSTANCE_URL = keyOf("instanceUrl");
     // Session token of the customer
-    private static final Metadata.Key<String> SESSION_TOKEN = keyOf("accessToken");
+    public static final Metadata.Key<String> SESSION_TOKEN = keyOf("accessToken");
     // Tenant Id of the customer org
-    private static final Metadata.Key<String> TENANT_ID = keyOf("tenantId");
+    public static final Metadata.Key<String> TENANT_ID = keyOf("tenantId");
     private final String instanceUrl;
     private final String accessToken;
     private final String orgId;
