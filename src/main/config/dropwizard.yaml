@@ -4,3 +4,11 @@ salesforceClientConfiguration:
 salesforceAuthenticationConfiguration:
     clientId: ""
     clientSecret: ""
+subscriberConfiguration:
+    host: "api.pubsub.salesforce.com"
+    numberOfEventsToSubscribeInEachFetchRequest: "1"
+    plaintextChannel: "false"
+    port: "7443"
+    replayId: "2"
+    replayPreset: "LATEST"
+    topic: "/event/Order__e"
