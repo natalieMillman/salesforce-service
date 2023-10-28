@@ -25,7 +25,8 @@ public class SalesforceServiceApplication extends Application<SalesforceServiceC
         SalesforceContext salesforceContext = new SalesforceContext(salesforceClient);
         SalesforceServiceResourceFactory resourceFactory = new SalesforceServiceResourceFactory(environment, salesforceContext).registerResources();
 
-        try (Subscriber subscribe = new Subscriber(configuration.getSubscriberConfiguration(), salesforceClient)) {
+        try {
+            Subscriber subscribe = new Subscriber(configuration.getSubscriberConfiguration(), salesforceClient);
             subscribe.startSubscription();
         } catch (Exception e) {
             printStatusRuntimeException("Error during Subscribe", e);
