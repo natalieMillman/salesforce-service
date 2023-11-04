@@ -2,6 +2,7 @@ package nyc.millman.salesforce.api.configuration;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.protobuf.ByteString;
 import com.salesforce.eventbus.protobuf.ReplayPreset;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -10,5 +11,5 @@ public record PubSubConfiguration(@JsonProperty("host") String host,
                                   @JsonProperty("numberOfEventsToSubscribeInEachFetchRequest") Integer numberOfEventsToSubscribeInEachFetchRequest,
                                   @JsonProperty("plaintextChannel") Boolean plaintextChannel,
                                   @JsonProperty("replayPreset") ReplayPreset replayPreset,
-                                  @JsonProperty("replayId") long replayId) {
+                                  @JsonProperty("replayId") ByteString replayId) {
 }
