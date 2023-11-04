@@ -11,5 +11,22 @@ grpcHostConfiguration:
     port: "7443"
     replayId: "2"
 subscriberConfiguration:
+    topics:
+        -   name: purchase
+            path: /event/Purchase__e
+            replayId: 2
+            interval: 5000
+        -   name: order
+            path: /event/Order__e
+            replayId: 2
+            interval: 5000
+
+pubSubConfiguration:
+    host: "api.pubsub.salesforce.com"
+    interval: "5000"
+    numberOfEventsToSubscribeInEachFetchRequest: "1"
+    plaintextChannel: "false"
+    port: "7443"
+    replayId: "2"
     replayPreset: "LATEST"
     topic: "TOPIC_NAME"
