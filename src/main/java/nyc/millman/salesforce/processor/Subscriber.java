@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import io.grpc.Metadata;
 import io.grpc.StatusRuntimeException;
 
-import nyc.millman.salesforce.api.configuration.SubscriberConfiguration;
+import nyc.millman.salesforce.api.configuration.PubSubConfiguration;
 import nyc.millman.salesforce.external.client.SalesforceClient;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
@@ -25,12 +25,11 @@ public class Subscriber extends PubSubService {
 
     private static int batchSize;
     private static final int MAX_RETRIES = 3;
+    private static final int SERVICE_UNAVAILABLE_WAIT_BEFORE_RETRY_SECONDS = 5;
     private static final String ERROR_REPLAY_ID_VALIDATION_FAILED = "fetch.replayid.validation.failed";
     private static final String ERROR_REPLAY_ID_INVALID = "fetch.replayid.corrupted";
     private static final String ERROR_SERVICE_UNAVAILABLE = "service.unavailable";
-    public static int SERVICE_UNAVAILABLE_WAIT_BEFORE_RETRY_SECONDS = 5;
-    private final SubscriberConfiguration subscriberConfiguration;
-
+    private final PubSubConfiguration subscriberConfiguration;
     private final SalesforceClient salesforceClient;
     public static AtomicBoolean isActive = new AtomicBoolean(false);
     public static AtomicInteger retriesLeft = new AtomicInteger(MAX_RETRIES);
@@ -44,18 +43,18 @@ public class Subscriber extends PubSubService {
     private final ScheduledExecutorService retryScheduler;
     private volatile ByteString storedReplay;
 
-    public Subscriber(SubscriberConfiguration subscriberConfiguration, SalesforceClient salesforceClient) {
-        super(subscriberConfiguration, salesforceClient);
-        isActive.set(true);
-        this.subscriberConfiguration = subscriberConfiguration;
-        this.salesforceClient = salesforceClient;
-        this.batchSize = Math.min(5, subscriberConfiguration.getNumberOfEventsToSubscribeInEachFetchRequest());
+    public Subscriber(PubSubConfiguration configuration, SalesforceClient client, String topic) {
+        super(configuration, client);
+        this.subscriberConfiguration = configuration;
+        this.salesforceClient = client;
+        this.batchSize = Math.min(5, configuration.numberOfEventsToSubscribeInEachFetchRequest());
         this.responseStreamObserver = getDefaultResponseStreamObserver();
-        this.replayPreset = subscriberConfiguration.getReplayPreset();
-        this.customReplayId = subscriberConfiguration.getReplayId();
+        this.replayPreset = configuration.replayPreset();
+        this.customReplayId = configuration.getReplayId();
         this.retryScheduler = Executors.newScheduledThreadPool(1);
         this.eventProcessingExecutors = Executors.newFixedThreadPool(3);
-        setupTopicDetails(subscriberConfiguration.getTopic(), SUBSCRIBE, false);
+        isActive.set(true);
+        setupTopicDetails(topic, SUBSCRIBE, false);
     }
 
     public void startSubscription() {
@@ -63,7 +62,7 @@ public class Subscriber extends PubSubService {
         fetch(batchSize, busTopicName, replayPreset, customReplayId);
         // Thread being blocked here for demonstration of this specific example. Blocking the thread in production is not recommended.
         while(isActive.get()) {
-            waitInMillis(5_000);
+            waitInMillis(configuration.interval());
             logger.info("Subscription Active. Received " + receivedEvents.get() + " events.");
         }
     }
