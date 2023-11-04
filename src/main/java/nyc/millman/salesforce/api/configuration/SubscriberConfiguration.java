@@ -107,14 +107,14 @@ public final class SubscriberConfiguration {
 
     @Override
     public String toString() {
-        return "SubscriberConfiguration[" +
-                "host=" + host + ", " +
-                "port=" + port + ", " +
-                "topic=" + topic + ", " +
-                "numberOfEventsToSubscribeInEachFetchRequest=" + numberOfEventsToSubscribeInEachFetchRequest + ", " +
-                "plaintextChannel=" + plaintextChannel + ", " +
-                "replayPreset=" + replayPreset + ", " +
-                "replayId=" + replayId + ']';
+        return "\"SubscriberConfiguration\":{" +
+                "\"host\":\"" + host + ":\", " +
+                "\"port\":\"" + port + ":\", " +
+                "\"topic\":\"" + topic + ":\", " +
+                "\"numberOfEventsToSubscribeInEachFetchRequest\":\"" + numberOfEventsToSubscribeInEachFetchRequest + ":\", " +
+                "\"plaintextChannel\":\"" + plaintextChannel + ":\", " +
+                "\"replayPreset\":\"" + replayPreset + ":\", " +
+                "\"replayId\":\"" + replayId + ":\"}";
     }
 
 }
