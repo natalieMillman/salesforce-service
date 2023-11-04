@@ -6,7 +6,7 @@
 
     <groupId>nyc.millman</groupId>
     <artifactId>salesforce-service</artifactId>
-    <version>1.2.1</version>
+    <version>1.3.1</version>
 
     <properties>
         <avro.version>1.11.0</avro.version>
