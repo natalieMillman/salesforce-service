@@ -1,16 +1,14 @@
 package nyc.millman.salesforce.processor;
 
 import java.io.*;
-import java.nio.ByteBuffer;
 
 import nyc.millman.salesforce.api.PubSubMode;
 import nyc.millman.salesforce.api.SalesforceCredentials;
-import nyc.millman.salesforce.api.configuration.SubscriberConfiguration;
+import nyc.millman.salesforce.api.configuration.PubSubConfiguration;
 import nyc.millman.salesforce.external.client.SalesforceClient;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.avro.io.BinaryDecoder;
 import org.apache.avro.io.DatumReader;
 import org.apache.avro.io.DecoderFactory;
@@ -31,20 +29,20 @@ public class PubSubService implements AutoCloseable {
     protected final PubSubGrpc.PubSubStub asyncStub;
     protected final PubSubGrpc.PubSubBlockingStub blockingStub;
     protected final SalesforceClient client;
-    protected final SubscriberConfiguration configuration;
+    protected final PubSubConfiguration configuration;
     protected String tenantGuid;
     protected String busTopicName;
     protected TopicInfo topicInfo;
     protected SchemaInfo schemaInfo;
     protected String sessionToken;
 
-    public PubSubService(SubscriberConfiguration configuration, SalesforceClient client) {
+    public PubSubService(PubSubConfiguration configuration, SalesforceClient client) {
         this.configuration = configuration;
         this.client = client;
-        this.grpcHost = configuration.getHost();
-        this.grpcPort = configuration.getPort();
+        this.grpcHost = configuration.host();
+        this.grpcPort = configuration.port();
         this.channel = buildChannel(grpcHost, grpcPort);
-        logger.info("Using grpcHost {} and grpcPort {}", grpcHost, grpcPort);
+        logger.info("Using host {} and port {}", grpcHost, grpcPort);
 
         SalesforceCredentials credentials  = new SalesforceCredentials(client.getToken());
         logger.info("SalesforceCredentials {}", credentials);
@@ -97,7 +95,7 @@ public class PubSubService implements AutoCloseable {
     }
 
     private ManagedChannel buildChannel(String grpcHost, int grpcPort){
-        if (configuration.getPlaintextChannel()) {
+        if (configuration.plaintextChannel()) {
             return ManagedChannelBuilder.forAddress(grpcHost, grpcPort).usePlaintext().build();
         } else {
             return ManagedChannelBuilder.forAddress(grpcHost, grpcPort).build();
