@@ -6,10 +6,10 @@ salesforceAuthenticationConfiguration:
     clientSecret: ""
 subscriberConfiguration:
     topics:
-        -   name: purchase
+        -   name: Purchase
             path: /event/Purchase__e
             interval: 5000
-        -   name: order
+        -   name: Order
             path: /event/Order__e
             interval: 5000
 
