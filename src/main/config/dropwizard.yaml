@@ -8,10 +8,8 @@ subscriberConfiguration:
     topics:
         -   name: Purchase
             path: /event/Purchase__e
-            interval: 5000
         -   name: Order
             path: /event/Order__e
-            interval: 5000
 
 pubSubConfiguration:
     host: "api.pubsub.salesforce.com"

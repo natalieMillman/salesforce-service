@@ -10,16 +10,12 @@ public class Topic {
     private final String name;
     @JsonProperty("path")
     private final String path;
-    @JsonProperty("interval")
-    private final long interval;
 
     public Topic(
             @JsonProperty("name") String name,
-            @JsonProperty("path") String path,
-            @JsonProperty("interval") long interval) {
+            @JsonProperty("path") String path) {
         this.name = name;
         this.path = path;
-        this.interval = interval;
     }
 
     @JsonProperty("name")
@@ -32,17 +28,11 @@ public class Topic {
         return path;
     }
 
-    @JsonProperty("interval")
-    public long getInterval() {
-        return interval;
-    }
-
     @Override
     public String toString() {
         return "\"Topic\":{" +
                 "\"name\":\"" + name + "\"" +
                 ", \"path\":\"" + path + "\"" +
-                ", \"interval\":" + interval +
                 "}";
     }
 
@@ -52,13 +42,12 @@ public class Topic {
         if (!(obj instanceof Topic)) return false;
         var that = (Topic) obj;
         return Objects.equals(this.name, that.name) &&
-                Objects.equals(this.path, that.path) &&
-                this.interval == that.interval;
+                Objects.equals(this.path, that.path);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, path, interval);
+        return Objects.hash(name, path);
     }
 
 }
