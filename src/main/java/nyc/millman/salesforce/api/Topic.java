@@ -10,19 +10,15 @@ public class Topic {
     private final String name;
     @JsonProperty("path")
     private final String path;
-    @JsonProperty("replayId")
-    private final long replayId;
     @JsonProperty("interval")
     private final long interval;
 
     public Topic(
             @JsonProperty("name") String name,
             @JsonProperty("path") String path,
-            @JsonProperty("replayId") long replayId,
             @JsonProperty("interval") long interval) {
         this.name = name;
         this.path = path;
-        this.replayId = replayId;
         this.interval = interval;
     }
 
@@ -36,11 +32,6 @@ public class Topic {
         return path;
     }
 
-    @JsonProperty("replayId")
-    public long getReplayId() {
-        return replayId;
-    }
-
     @JsonProperty("interval")
     public long getInterval() {
         return interval;
@@ -51,7 +42,6 @@ public class Topic {
         return "\"Topic\":{" +
                 "\"name\":\"" + name + "\"" +
                 ", \"path\":\"" + path + "\"" +
-                ", \"replayId\":" + replayId +
                 ", \"interval\":" + interval +
                 "}";
     }
@@ -63,13 +53,12 @@ public class Topic {
         var that = (Topic) obj;
         return Objects.equals(this.name, that.name) &&
                 Objects.equals(this.path, that.path) &&
-                this.replayId == that.replayId &&
                 this.interval == that.interval;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, path, replayId, interval);
+        return Objects.hash(name, path, interval);
     }
 
 }

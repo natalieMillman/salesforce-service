@@ -8,11 +8,9 @@ subscriberConfiguration:
     topics:
         -   name: purchase
             path: /event/Purchase__e
-            replayId: 2
             interval: 5000
         -   name: order
             path: /event/Order__e
-            replayId: 2
             interval: 5000
 
 pubSubConfiguration:
